@@ -1,13 +1,15 @@
-package com.example.samuel.recyclermvp;
+package com.example.samuel.recyclermvp.view;
 
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 
-public class DetailsActivity extends AppCompatActivity {
+import com.example.samuel.recyclermvp.R;
+
+public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_details);
+        setContentView(R.layout.activity_main);
     }
 }
