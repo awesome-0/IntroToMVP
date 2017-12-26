@@ -4,32 +4,33 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
+    android:background="@color/colorPrimary"
     android:layout_height="88dp">
 
-    <ImageView
+    <de.hdodenhof.circleimageview.CircleImageView
         android:id="@+id/data_image"
         android:layout_width="48dp"
         android:layout_height="48dp"
         android:layout_marginBottom="16dp"
-        android:layout_marginEnd="8dp"
         android:layout_marginStart="16dp"
         android:layout_marginTop="16dp"
         android:src="@color/RED"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/imageView"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <ImageView
         android:id="@+id/imageView"
-        android:layout_width="25dp"
-        android:layout_height="25dp"
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"
         android:layout_marginBottom="16dp"
+        android:layout_marginStart="16dp"
         android:layout_marginTop="8dp"
         android:src="@drawable/ic_action_event"
+        android:tint="@android:color/white"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/data_caption"
-        tools:layout_editor_absoluteX="84dp" />
+        app:layout_constraintStart_toEndOf="@+id/data_image"
+        app:layout_constraintTop_toBottomOf="@+id/data_caption" />
 
     <TextView
         android:id="@+id/data_caption"
@@ -38,10 +39,12 @@
         android:layout_marginEnd="8dp"
         android:layout_marginStart="16dp"
         android:layout_marginTop="16dp"
+        android:textColor="@android:color/white"
+        android:alpha=".86"
         android:ellipsize="end"
+        android:fontFamily="sans-serif-medium"
         android:gravity="center_vertical"
         android:maxLines="1"
-        android:fontFamily="sans-serif-medium"
         android:text="my name is samuel and everythwesome"
         android:textSize="20sp"
         app:layout_constraintEnd_toEndOf="parent"
@@ -57,6 +60,8 @@
         android:layout_marginStart="16dp"
         android:layout_marginTop="8dp"
         android:text="24th april 2018"
+        android:textColor="@android:color/white"
+        android:alpha=".86"
         android:fontFamily="sans-serif-light"
         android:textSize="16sp"
         app:layout_constraintBottom_toBottomOf="parent"

@@ -1,10 +1,12 @@
 package com.example.samuel.recyclermvp.data;
 
+import java.io.Serializable;
+
 /**
  * Created by Samuel on 23/12/2017.
  */
 
-public class ListItem {
+public class ListItem implements Serializable{
     private String message,dateTime;
     private int colorResource;
 

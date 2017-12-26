@@ -8,4 +8,6 @@ import java.util.List;
 
 public interface DataSourceInterface {
     List<ListItem> getListItems();
+
+    ListItem createNewListItem();
 }

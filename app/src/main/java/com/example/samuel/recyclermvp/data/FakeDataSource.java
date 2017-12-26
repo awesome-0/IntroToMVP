@@ -16,6 +16,7 @@ public class FakeDataSource implements DataSourceInterface {
     private Random random;
 
     public FakeDataSource() {
+
     }
 
     private final String[] datesAndTimes = {
@@ -42,9 +43,11 @@ public class FakeDataSource implements DataSourceInterface {
             R.color.YELLOW,
             R.color.BLUE
     };
+
     @Override
     public List<ListItem> getListItems() {
         ArrayList<ListItem> ListItems = new ArrayList<>();
+        random = new Random();
         for(int i = 0;i< 12 ; i++){
 
             ListItem item = new ListItem(messages[random.nextInt(4)],datesAndTimes[random.nextInt(4)]
@@ -55,5 +58,10 @@ public class FakeDataSource implements DataSourceInterface {
 
 
         return ListItems;
+    }
+
+    @Override
+    public ListItem createNewListItem() {
+        return new ListItem("I am the newly added Item","27 / 27 /2017",R.color.RED);
     }
 }
