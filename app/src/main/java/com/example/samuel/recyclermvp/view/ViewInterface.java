@@ -14,4 +14,10 @@ public interface ViewInterface {
     void  setUpAdapterAndView(List<ListItem> listItems);
 
     void addItemToAdapter(ListItem item);
+
+    void deleteItemAt(int position);
+
+    void showUndoSnackBar();
+
+    void insertItemAt(int tempItemPosition, ListItem tempItem);
 }

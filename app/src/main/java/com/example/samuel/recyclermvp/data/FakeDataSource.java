@@ -11,6 +11,7 @@ import java.util.Random;
  */
 
 public class FakeDataSource implements DataSourceInterface {
+    ArrayList<ListItem> ListItems = new ArrayList<>();
 
     private static final int sizeOfCollection = 12;
     private Random random;
@@ -46,7 +47,7 @@ public class FakeDataSource implements DataSourceInterface {
 
     @Override
     public List<ListItem> getListItems() {
-        ArrayList<ListItem> ListItems = new ArrayList<>();
+
         random = new Random();
         for(int i = 0;i< 12 ; i++){
 
@@ -63,5 +64,16 @@ public class FakeDataSource implements DataSourceInterface {
     @Override
     public ListItem createNewListItem() {
         return new ListItem("I am the newly added Item","27 / 27 /2017",R.color.RED);
+    }
+
+    @Override
+    public void deleteListItem(ListItem listItem) {
+       // ListItems.remove(listItem);
+
+    }
+
+    @Override
+    public void insertItem(int tempItemPosition, ListItem tempItem) {
+        ListItems.add(tempItem);
     }
 }

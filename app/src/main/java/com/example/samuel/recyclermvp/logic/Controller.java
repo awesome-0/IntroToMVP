@@ -12,6 +12,8 @@ import com.example.samuel.recyclermvp.view.ViewInterface;
  */
 
 public class Controller {
+    private ListItem tempItem;
+    private int tempItemPosition;
     private static final String TAG = "Controller";
     private ViewInterface view;
     private DataSourceInterface data;
@@ -35,6 +37,28 @@ public class Controller {
     public void createNewItem() {
         ListItem item = data.createNewListItem();
         view.addItemToAdapter(item);
+    }
+
+    public void OnListItemSwiped(int position, ListItem listItem) {
+        data.deleteListItem(listItem);
+        view.deleteItemAt(position);
+        tempItem = listItem;
+        tempItemPosition = position;
+        view.showUndoSnackBar();
+    }
+
+    public void OnUndoConfirmed() {
+        if(tempItem != null ){
+            data.insertItem(tempItemPosition,tempItem);
+            view.insertItemAt(tempItemPosition,tempItem);
+            tempItemPosition = 0;
+            tempItem = null;
+        }
+    }
+
+    public void OnSnackBarDismissed() {
+        tempItemPosition = 0;
+        tempItem = null;
     }
 }
 

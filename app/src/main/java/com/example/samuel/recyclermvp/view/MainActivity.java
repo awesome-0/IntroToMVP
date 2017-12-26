@@ -2,13 +2,17 @@ package com.example.samuel.recyclermvp.view;
 
 import android.content.Context;
 import android.content.Intent;
+import android.support.design.widget.BaseTransientBottomBar;
 import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.Snackbar;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.helper.ItemTouchHelper;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -28,6 +32,7 @@ public class MainActivity extends AppCompatActivity implements ViewInterface{
     private RecyclerView recyclerView;
     private CustomAdapter adapter;
     private Controller controller;
+    private static final String TAG = "MainActivity";
 
 
     @Override
@@ -56,7 +61,7 @@ public class MainActivity extends AppCompatActivity implements ViewInterface{
     }
 
     @Override
-    public void setUpAdapterAndView(List<ListItem> listItems) {
+    public void setUpAdapterAndView(final List<ListItem> listItems) {
         LinearLayoutManager manager = new LinearLayoutManager(this);
 
         this.listItems = listItems;
@@ -66,6 +71,34 @@ public class MainActivity extends AppCompatActivity implements ViewInterface{
         DividerItemDecoration decoration = new DividerItemDecoration(recyclerView.getContext(),manager.getOrientation());
         decoration.setDrawable(ContextCompat.getDrawable(MainActivity.this,R.drawable.divider_white));
         recyclerView.addItemDecoration(decoration);
+        ItemTouchHelper itemTouchHelper = new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(0,
+                ItemTouchHelper.RIGHT | ItemTouchHelper.LEFT){
+
+
+            @Override
+            public boolean onMove(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, RecyclerView.ViewHolder target) {
+                return false;
+            }
+
+            @Override
+            public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction) {
+
+                Log.d(TAG, "onSwiped: item swiped");
+                try{
+
+                    int position = viewHolder.getAdapterPosition();
+                    controller.OnListItemSwiped(
+                            position,
+                            listItems.get(position)
+                    );
+                }
+                catch (IndexOutOfBoundsException e){
+                    Log.e(TAG, "onSwiped: " +e.getMessage() );
+                }
+
+            }
+        });
+        itemTouchHelper.attachToRecyclerView(recyclerView);
     }
 
     @Override
@@ -74,6 +107,38 @@ public class MainActivity extends AppCompatActivity implements ViewInterface{
         int endOfList = listItems.size() - 1;
         adapter.notifyItemInserted(endOfList);
         recyclerView.smoothScrollToPosition(endOfList);
+    }
+
+    @Override
+    public void deleteItemAt(int position) {
+        listItems.remove(position );
+        adapter.notifyItemRemoved(position);
+    }
+
+    @Override
+    public void showUndoSnackBar() {
+        Snackbar.make(
+                findViewById(R.id.root_layout),
+                "Item Deleted",
+                Snackbar.LENGTH_LONG
+        ).setAction("Undo", new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+               controller.OnUndoConfirmed();
+            }
+        }).addCallback(new BaseTransientBottomBar.BaseCallback<Snackbar>() {
+            @Override
+            public void onDismissed(Snackbar transientBottomBar, int event) {
+                super.onDismissed(transientBottomBar, event);
+                controller.OnSnackBarDismissed();
+            }
+        }).show();
+    }
+
+    @Override
+    public void insertItemAt(int tempItemPosition, ListItem tempItem) {
+        listItems.add(tempItemPosition,tempItem);
+        adapter.notifyItemInserted(tempItemPosition);
     }
 
     public class CustomAdapter extends RecyclerView.Adapter<CustomAdapter.CustomViewHolder>{
