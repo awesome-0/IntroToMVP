@@ -1,6 +1,7 @@
 package com.example.samuel.recyclermvp.logic;
 
 import android.util.Log;
+import android.view.View;
 
 import com.example.samuel.recyclermvp.data.DataSourceInterface;
 import com.example.samuel.recyclermvp.data.FakeDataSource;
@@ -30,8 +31,8 @@ public class Controller {
       //  Log.d(TAG, "getListItemsFromDataSource: " + data.getListItems());
     }
 
-    public void OnListItemClicked(ListItem item) {
-        view.startDetailsActivity(item);
+    public void OnListItemClicked(ListItem item,View viewRoot) {
+        view.startDetailsActivity(item,viewRoot);
     }
 
     public void createNewItem() {

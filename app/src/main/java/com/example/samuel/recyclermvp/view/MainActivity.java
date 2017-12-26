@@ -1,7 +1,9 @@
 package com.example.samuel.recyclermvp.view;
 
+import android.app.ActivityOptions;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Build;
 import android.support.design.widget.BaseTransientBottomBar;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -12,7 +14,9 @@ import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
+import android.transition.Fade;
 import android.util.Log;
+import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -25,6 +29,8 @@ import com.example.samuel.recyclermvp.data.ListItem;
 import com.example.samuel.recyclermvp.logic.Controller;
 
 import java.util.List;
+
+import de.hdodenhof.circleimageview.CircleImageView;
 
 public class MainActivity extends AppCompatActivity implements ViewInterface{
 
@@ -51,12 +57,32 @@ public class MainActivity extends AppCompatActivity implements ViewInterface{
             }
         });
     }
+    public View findView(View view,int Id){
+        return view.findViewById(Id);
+    }
+
 
     @Override
-    public void startDetailsActivity(ListItem item) {
+    public void startDetailsActivity(ListItem item,View viewRoot) {
         Intent detailsIntent = new Intent(MainActivity.this,DetailsActivity.class);
         detailsIntent.putExtra("item",item);
-        startActivity(detailsIntent);
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP){
+
+            getWindow().setEnterTransition(new Fade(Fade.IN));
+            getWindow().setEnterTransition(new Fade(Fade.OUT));
+            ActivityOptions options = ActivityOptions
+                    .makeSceneTransitionAnimation(
+                    this,
+                    new Pair<View, String>(findView(viewRoot,R.id.data_image),getString(R.string.drawable)),
+                    new Pair<View, String>(findView(viewRoot,R.id.data_caption),getString(R.string.message)),
+                    new Pair<View, String>(findView(viewRoot,R.id.data_date_time),getString(R.string.date_time))
+            );
+            startActivity(detailsIntent,options.toBundle());
+        }
+        else{
+            startActivity(detailsIntent);
+        }
+
 
     }
 
@@ -111,7 +137,7 @@ public class MainActivity extends AppCompatActivity implements ViewInterface{
 
     @Override
     public void deleteItemAt(int position) {
-        listItems.remove(position );
+       listItems.remove(position);
         adapter.notifyItemRemoved(position);
     }
 
@@ -171,7 +197,7 @@ public class MainActivity extends AppCompatActivity implements ViewInterface{
 
         public class CustomViewHolder extends RecyclerView.ViewHolder {
             private TextView msg,date;
-            private ImageView color;
+            private CircleImageView color;
             public CustomViewHolder(View itemView) {
                 super(itemView);
                 msg = itemView.findViewById(R.id.data_caption);
@@ -181,7 +207,7 @@ public class MainActivity extends AppCompatActivity implements ViewInterface{
                     @Override
                     public void onClick(View view) {
                         ListItem item = listItems.get(getAdapterPosition());
-                        controller.OnListItemClicked(item);
+                        controller.OnListItemClicked(item,view);
                     }
                 });
             }

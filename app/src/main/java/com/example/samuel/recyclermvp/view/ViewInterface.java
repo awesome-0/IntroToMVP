@@ -1,5 +1,7 @@
 package com.example.samuel.recyclermvp.view;
 
+import android.view.View;
+
 import com.example.samuel.recyclermvp.data.ListItem;
 
 import java.util.List;
@@ -9,7 +11,7 @@ import java.util.List;
  */
 
 public interface ViewInterface {
-    void startDetailsActivity(ListItem item);
+    void startDetailsActivity(ListItem item,View ViewRoot);
 
     void  setUpAdapterAndView(List<ListItem> listItems);
 
