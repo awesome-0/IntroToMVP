@@ -15,12 +15,14 @@
 
     <ImageView
         android:id="@+id/item_image"
+        android:transitionName="@string/drawable"
         android:layout_above="@id/divider"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="@color/RED"/>
     <TextView
         android:id="@+id/item_caption"
+        android:transitionName="@string/message"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_above="@id/divider"
@@ -28,9 +30,11 @@
         tools:text="awesome is the best in the world"
         />
     <TextView
+        android:transitionName="@string/date_time"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/item_description"
+        android:textColor="@android:color/white"
         android:layout_below="@id/divider"
         style="@style/Text.Secondary"
         android:text="@string/bottom_sheet_behavior"/>
