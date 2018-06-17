@@ -41,6 +41,7 @@ public class MainActivity extends AppCompatActivity implements ViewInterface {
     private RecyclerView recyclerView;
     private CustomAdapter adapter;
     private Controller controller;
+    boolean isScrolling;
 
     private static final String TAG = "MainActivity";
 
@@ -90,6 +91,13 @@ public class MainActivity extends AppCompatActivity implements ViewInterface {
 
     }
 
+    public void setIsScrolling (boolean isScrolling){
+        this.isScrolling = isScrolling;
+    }
+    public boolean isScrolling(){
+        return isScrolling;
+    }
+
     @Override
     public void setUpAdapterAndView(final List<ListItem> listItems) {
         LinearLayoutManager manager = new LinearLayoutManager(this);
@@ -135,6 +143,19 @@ public class MainActivity extends AppCompatActivity implements ViewInterface {
         adapter = new CustomAdapter(this);
         adapter.setItemTouchHelper(itemTouchHelper);
         recyclerView.setAdapter(adapter);
+        recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+                super.onScrollStateChanged(recyclerView, newState);
+                setIsScrolling(true);
+            }
+
+            @Override
+            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+                super.onScrolled(recyclerView, dx, dy);
+                setIsScrolling(true);
+            }
+        });
         DividerItemDecoration decoration = new DividerItemDecoration(recyclerView.getContext(), manager.getOrientation());
         decoration.setDrawable(ContextCompat.getDrawable(MainActivity.this, R.drawable.divider_white));
         recyclerView.addItemDecoration(decoration);
@@ -247,7 +268,10 @@ public class MainActivity extends AppCompatActivity implements ViewInterface {
 
         @Override
         public void onLongPress(MotionEvent motionEvent) {
-            helper.startDrag(viewHolder);
+            if(!isScrolling){
+                helper.startDrag(viewHolder);
+            }
+
 
 
         }
@@ -272,9 +296,18 @@ public class MainActivity extends AppCompatActivity implements ViewInterface {
                     @Override
                     public boolean onTouch(View view, MotionEvent motionEvent) {
                         ListItem item = listItems.get(getAdapterPosition());
-                        mGestureDetector.onTouchEvent(motionEvent);
-                        controller.OnListItemClicked(item, view);
+                        if(motionEvent.getAction() == MotionEvent.ACTION_DOWN){
+                            setIsScrolling(false);
+                            mGestureDetector.onTouchEvent(motionEvent);
+                            }
                         return false;
+                    }
+                });
+                itemView.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        ListItem item = listItems.get(getAdapterPosition());
+                        controller.OnListItemClicked(item, view);
                     }
                 });
             }
