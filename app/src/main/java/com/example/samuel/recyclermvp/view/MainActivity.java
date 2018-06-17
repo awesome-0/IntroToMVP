@@ -1,6 +1,7 @@
 package com.example.samuel.recyclermvp.view;
 
 import android.app.ActivityOptions;
+import android.content.ClipData;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
@@ -17,7 +18,9 @@ import android.support.v7.widget.helper.ItemTouchHelper;
 import android.transition.Fade;
 import android.util.Log;
 import android.util.Pair;
+import android.view.GestureDetector;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
@@ -32,12 +35,13 @@ import java.util.List;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
-public class MainActivity extends AppCompatActivity implements ViewInterface{
+public class MainActivity extends AppCompatActivity implements ViewInterface {
 
     private List<ListItem> listItems;
     private RecyclerView recyclerView;
     private CustomAdapter adapter;
     private Controller controller;
+
     private static final String TAG = "MainActivity";
 
 
@@ -48,7 +52,7 @@ public class MainActivity extends AppCompatActivity implements ViewInterface{
 
         recyclerView = findViewById(R.id.rec_main_activity);
 
-        controller = new Controller(this,new FakeDataSource());
+        controller = new Controller(this, new FakeDataSource());
         FloatingActionButton fab = findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -57,29 +61,29 @@ public class MainActivity extends AppCompatActivity implements ViewInterface{
             }
         });
     }
-    public View findView(View view,int Id){
+
+    public View findView(View view, int Id) {
         return view.findViewById(Id);
     }
 
 
     @Override
-    public void startDetailsActivity(ListItem item,View viewRoot) {
-        Intent detailsIntent = new Intent(MainActivity.this,DetailsActivity.class);
-        detailsIntent.putExtra("item",item);
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP){
+    public void startDetailsActivity(ListItem item, View viewRoot) {
+        Intent detailsIntent = new Intent(MainActivity.this, DetailsActivity.class);
+        detailsIntent.putExtra("item", item);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
 
             getWindow().setEnterTransition(new Fade(Fade.IN));
             getWindow().setEnterTransition(new Fade(Fade.OUT));
             ActivityOptions options = ActivityOptions
                     .makeSceneTransitionAnimation(
-                    this,
-                    new Pair<View, String>(findView(viewRoot,R.id.data_image),getString(R.string.drawable)),
-                    new Pair<View, String>(findView(viewRoot,R.id.data_caption),getString(R.string.message)),
-                    new Pair<View, String>(findView(viewRoot,R.id.data_date_time),getString(R.string.date_time))
-            );
-            startActivity(detailsIntent,options.toBundle());
-        }
-        else{
+                            this,
+                            new Pair<View, String>(findView(viewRoot, R.id.data_image), getString(R.string.drawable)),
+                            new Pair<View, String>(findView(viewRoot, R.id.data_caption), getString(R.string.message)),
+                            new Pair<View, String>(findView(viewRoot, R.id.data_date_time), getString(R.string.date_time))
+                    );
+            startActivity(detailsIntent, options.toBundle());
+        } else {
             startActivity(detailsIntent);
         }
 
@@ -92,17 +96,20 @@ public class MainActivity extends AppCompatActivity implements ViewInterface{
 
         this.listItems = listItems;
         recyclerView.setLayoutManager(manager);
-        adapter = new CustomAdapter();
-        recyclerView.setAdapter(adapter);
-        DividerItemDecoration decoration = new DividerItemDecoration(recyclerView.getContext(),manager.getOrientation());
-        decoration.setDrawable(ContextCompat.getDrawable(MainActivity.this,R.drawable.divider_white));
-        recyclerView.addItemDecoration(decoration);
         ItemTouchHelper itemTouchHelper = new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(0,
-                ItemTouchHelper.RIGHT | ItemTouchHelper.LEFT){
+                ItemTouchHelper.RIGHT | ItemTouchHelper.LEFT) {
 
 
             @Override
+            public int getMovementFlags(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder) {
+                int vert = ItemTouchHelper.UP | ItemTouchHelper.DOWN;
+                int hori = ItemTouchHelper.START | ItemTouchHelper.END;
+                return makeMovementFlags(vert,hori);
+            }
+
+            @Override
             public boolean onMove(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, RecyclerView.ViewHolder target) {
+               controller.onDragging(viewHolder.getAdapterPosition(),target.getAdapterPosition());
                 return false;
             }
 
@@ -110,21 +117,28 @@ public class MainActivity extends AppCompatActivity implements ViewInterface{
             public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction) {
 
                 Log.d(TAG, "onSwiped: item swiped");
-                try{
+                try {
 
                     int position = viewHolder.getAdapterPosition();
                     controller.OnListItemSwiped(
                             position,
                             listItems.get(position)
                     );
-                }
-                catch (IndexOutOfBoundsException e){
-                    Log.e(TAG, "onSwiped: " +e.getMessage() );
+                } catch (IndexOutOfBoundsException e) {
+                    Log.e(TAG, "onSwiped: " + e.getMessage());
                 }
 
             }
+
         });
         itemTouchHelper.attachToRecyclerView(recyclerView);
+        adapter = new CustomAdapter(this);
+        adapter.setItemTouchHelper(itemTouchHelper);
+        recyclerView.setAdapter(adapter);
+        DividerItemDecoration decoration = new DividerItemDecoration(recyclerView.getContext(), manager.getOrientation());
+        decoration.setDrawable(ContextCompat.getDrawable(MainActivity.this, R.drawable.divider_white));
+        recyclerView.addItemDecoration(decoration);
+
     }
 
     @Override
@@ -137,7 +151,7 @@ public class MainActivity extends AppCompatActivity implements ViewInterface{
 
     @Override
     public void deleteItemAt(int position) {
-       listItems.remove(position);
+        listItems.remove(position);
         adapter.notifyItemRemoved(position);
     }
 
@@ -150,7 +164,7 @@ public class MainActivity extends AppCompatActivity implements ViewInterface{
         ).setAction("Undo", new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-               controller.OnUndoConfirmed();
+                controller.OnUndoConfirmed();
             }
         }).addCallback(new BaseTransientBottomBar.BaseCallback<Snackbar>() {
             @Override
@@ -163,18 +177,34 @@ public class MainActivity extends AppCompatActivity implements ViewInterface{
 
     @Override
     public void insertItemAt(int tempItemPosition, ListItem tempItem) {
-        listItems.add(tempItemPosition,tempItem);
+        listItems.add(tempItemPosition, tempItem);
         adapter.notifyItemInserted(tempItemPosition);
     }
 
-    public class CustomAdapter extends RecyclerView.Adapter<CustomAdapter.CustomViewHolder>{
+    @Override
+    public void doneSwitching(int fromPosition, int toPosition) {
+        adapter.notifyItemMoved(fromPosition,toPosition);
+    }
 
 
+    public class CustomAdapter extends RecyclerView.Adapter<CustomAdapter.CustomViewHolder> implements GestureDetector.OnGestureListener {
+
+        GestureDetector mGestureDetector;
+        ItemTouchHelper helper;
+        RecyclerView.ViewHolder viewHolder;
+
+        void setItemTouchHelper(ItemTouchHelper helper) {
+            this.helper = helper;
+        }
+
+        public CustomAdapter(Context mContext) {
+            mGestureDetector = new GestureDetector(mContext,this);
+        }
 
         @Override
         public CustomAdapter.CustomViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
 
-            View view = getLayoutInflater().inflate(R.layout.item_data,parent,false);
+            View view = getLayoutInflater().inflate(R.layout.item_data, parent, false);
             return new CustomViewHolder(view);
 
 
@@ -183,6 +213,7 @@ public class MainActivity extends AppCompatActivity implements ViewInterface{
         @Override
         public void onBindViewHolder(CustomAdapter.CustomViewHolder holder, int position) {
 
+            viewHolder = holder;
             ListItem item = listItems.get(position);
             holder.color.setImageResource(item.getColorResource());
             holder.msg.setText(item.getMessage());
@@ -194,20 +225,56 @@ public class MainActivity extends AppCompatActivity implements ViewInterface{
             return listItems.size();
         }
 
+        @Override
+        public boolean onDown(MotionEvent motionEvent) {
+            return false;
+        }
+
+        @Override
+        public void onShowPress(MotionEvent motionEvent) {
+
+        }
+
+        @Override
+        public boolean onSingleTapUp(MotionEvent motionEvent) {
+            return false;
+        }
+
+        @Override
+        public boolean onScroll(MotionEvent motionEvent, MotionEvent motionEvent1, float v, float v1) {
+            return false;
+        }
+
+        @Override
+        public void onLongPress(MotionEvent motionEvent) {
+            helper.startDrag(viewHolder);
+
+
+        }
+
+        @Override
+        public boolean onFling(MotionEvent motionEvent, MotionEvent motionEvent1, float v, float v1) {
+            return false;
+        }
+
 
         public class CustomViewHolder extends RecyclerView.ViewHolder {
-            private TextView msg,date;
+            private TextView msg, date;
             private CircleImageView color;
+
             public CustomViewHolder(View itemView) {
                 super(itemView);
                 msg = itemView.findViewById(R.id.data_caption);
                 date = itemView.findViewById(R.id.data_date_time);
                 color = itemView.findViewById(R.id.data_image);
-                itemView.setOnClickListener(new View.OnClickListener() {
+
+                itemView.setOnTouchListener(new View.OnTouchListener() {
                     @Override
-                    public void onClick(View view) {
+                    public boolean onTouch(View view, MotionEvent motionEvent) {
                         ListItem item = listItems.get(getAdapterPosition());
-                        controller.OnListItemClicked(item,view);
+                        mGestureDetector.onTouchEvent(motionEvent);
+                        controller.OnListItemClicked(item, view);
+                        return false;
                     }
                 });
             }

@@ -14,4 +14,6 @@ public interface DataSourceInterface {
     void deleteListItem(ListItem listItem);
 
     void insertItem(int tempItemPosition, ListItem tempItem);
+
+    void swapItems(int fromPosition, int toPosition);
 }

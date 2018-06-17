@@ -61,5 +61,10 @@ public class Controller {
         tempItemPosition = 0;
         tempItem = null;
     }
+
+    public void onDragging(int fromPosition, int toPosition) {
+        data.swapItems(fromPosition,toPosition);
+        view.doneSwitching(fromPosition,toPosition);
+    }
 }
 

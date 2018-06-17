@@ -22,4 +22,6 @@ public interface ViewInterface {
     void showUndoSnackBar();
 
     void insertItemAt(int tempItemPosition, ListItem tempItem);
+
+    void doneSwitching(int fromPosition, int toPosition);
 }

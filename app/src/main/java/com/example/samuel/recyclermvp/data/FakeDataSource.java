@@ -76,4 +76,12 @@ public class FakeDataSource implements DataSourceInterface {
     public void insertItem(int tempItemPosition, ListItem tempItem) {
        // ListItems.add(tempItem);
     }
+
+    @Override
+    public void swapItems(int fromPosition, int toPosition) {
+        ListItem listItem = ListItems.get(fromPosition);
+        ListItems.remove(fromPosition);
+        ListItems.add(toPosition,listItem);
+
+    }
 }
